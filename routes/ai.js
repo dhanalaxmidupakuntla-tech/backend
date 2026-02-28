@@ -1,5 +1,5 @@
-import express from "express";
-import OpenAI from "openai";
+const express = require("express");
+const OpenAI = require("openai");
 
 const router = express.Router();
 
@@ -36,4 +36,4 @@ router.post("/chat", async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;
