@@ -11,6 +11,7 @@ const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const rewardRoutes = require("./routes/rewardRoutes");
 const recommendRoutes = require("./routes/recommendRoutes");
 const rateLimit = require("express-rate-limit");
+const aiRoutes = require("./routes/ai");
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use("/api/streak", streakRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/reward", rewardRoutes);
 app.use("/api/recommend", recommendRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
   res.send("API Running 🚀");
