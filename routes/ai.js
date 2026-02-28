@@ -9,6 +9,10 @@ const client = new openai.OpenAI({
 // AI Chat Endpoint
 router.post('/chat', async (req, res) => {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY is not set');
+      return res.status(500).json({ error: 'OpenAI API key not configured on server' });
+    }
     const { message, topic, difficulty, type } = req.body;
 
     if (!message) {
@@ -48,10 +52,15 @@ Guidelines:
       tokens_used: response.usage.total_tokens,
     });
   } catch (error) {
-    console.error('AI Error:', error.message);
+    console.error('AI Error:', error);
+    const errMsg = error?.message || 'Unknown error from AI service';
+    // include any response details if present (helpful for remote debugging)
+    if (error?.response) {
+      console.error('AI response error details:', error.response);
+    }
     res.status(500).json({
       error: 'Failed to get AI response',
-      message: error.message,
+      message: errMsg,
     });
   }
 });
