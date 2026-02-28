@@ -1,11 +1,14 @@
 // routes/ai.js
-import { OpenAI } from "openai";
+const express = require("express");
+const router = express.Router();
+const OpenAI = require("openai");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const aiChat = async (req, res) => {
+// POST /api/ai/chat
+router.post("/chat", async (req, res) => {
   try {
     const { message, topic = "General", difficulty = "beginner" } = req.body;
 
@@ -33,4 +36,6 @@ Provide concise, encouraging responses.`;
     console.error("OpenAI API Error:", error.message);
     res.status(500).json({ error: "Failed to get AI response" });
   }
-};
+});
+
+module.exports = router;
