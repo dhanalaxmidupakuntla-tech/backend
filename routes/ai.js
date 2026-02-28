@@ -7,9 +7,11 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// POST /api/ai/chat
 router.post("/chat", async (req, res) => {
   try {
     const { message } = req.body;
+    if (!message) return res.status(400).json({ error: "Message is required" });
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -17,27 +19,24 @@ router.post("/chat", async (req, res) => {
         {
           role: "system",
           content: `
-                You are an exciting language tutor for children.
-                Use emojis.
-                Give examples in Spanish, French, and German.
-                Keep explanations under 5 sentences.
-                Encourage the student.
-                `,
+            You are a fun language tutor for children.
+            Use emojis.
+            Give examples in Spanish, French, and German.
+            Keep explanations short.
+            Encourage the student.
+          `,
         },
-        {
-          role: "user",
-          content: message,
-        },
+        { role: "user", content: message },
       ],
       max_tokens: 200,
     });
 
-    res.json({
-      reply: completion.choices[0].message.content,
-    });
+    const reply = completion.choices?.[0]?.message?.content || "No reply generated";
+    res.json({ reply });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "AI failed" });
+    console.error("OpenAI error:", error.response?.data || error.message || error);
+    res.status(500).json({ error: "AI failed", details: error.message });
   }
 });
 
