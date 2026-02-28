@@ -22,15 +22,13 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://your-frontend-url.onrender.com"
-    ],
-    credentials: true,
-  })
-);
+// CORS Configuration
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5174',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 app.use(helmet());
 

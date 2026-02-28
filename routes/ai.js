@@ -1,42 +1,58 @@
-const express = require("express");
-const OpenAI = require("openai");
-
+const express = require('express');
 const router = express.Router();
+const openai = require('openai');
 
-const openai = new OpenAI({
+const client = new openai.OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// POST /api/ai/chat
-router.post("/chat", async (req, res) => {
+// AI Chat Endpoint
+router.post('/chat', async (req, res) => {
   try {
-    const { message } = req.body;
-    if (!message) return res.status(400).json({ error: "Message is required" });
+    const { message, topic, difficulty, type } = req.body;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    // Create system prompt based on topic and difficulty
+    const systemPrompt = `You are Lingoo AI, a friendly language tutor.
+Topic: ${topic || 'General'}
+Difficulty Level: ${difficulty || 'beginner'}
+Type: ${type || 'tutor'}
+
+Guidelines:
+- For beginner: Use simple words and short sentences. Include English translations.
+- For intermediate: Mix native language with English explanations.
+- For advanced: Respond mostly in the target language.
+- Keep responses concise (2-4 sentences).
+- Include pronunciation tips when helpful.
+- Be encouraging and supportive.`;
+
+    const response = await client.chat.completions.create({
+      model: 'gpt-3.5-turbo',
       messages: [
-        {
-          role: "system",
-          content: `
-            You are a fun language tutor for children.
-            Use emojis.
-            Give examples in Spanish, French, and German.
-            Keep explanations short.
-            Encourage the student.
-          `,
-        },
-        { role: "user", content: message },
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: message },
       ],
-      max_tokens: 200,
+      max_tokens: 150,
+      temperature: 0.7,
     });
 
-    const reply = completion.choices?.[0]?.message?.content || "No reply generated";
-    res.json({ reply });
+    const reply = response.choices[0].message.content;
 
+    res.json({
+      reply,
+      topic,
+      difficulty,
+      tokens_used: response.usage.total_tokens,
+    });
   } catch (error) {
-    console.error("OpenAI error:", error.response?.data || error.message || error);
-    res.status(500).json({ error: "AI failed", details: error.message });
+    console.error('AI Error:', error.message);
+    res.status(500).json({
+      error: 'Failed to get AI response',
+      message: error.message,
+    });
   }
 });
 
