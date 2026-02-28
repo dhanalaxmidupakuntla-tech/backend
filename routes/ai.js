@@ -1,68 +1,36 @@
-const express = require('express');
-const router = express.Router();
-const openai = require('openai');
+// routes/ai.js
+import { OpenAI } from "openai";
 
-const client = new openai.OpenAI({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// AI Chat Endpoint
-router.post('/chat', async (req, res) => {
+export const aiChat = async (req, res) => {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not set');
-      return res.status(500).json({ error: 'OpenAI API key not configured on server' });
-    }
-    const { message, topic, difficulty, type } = req.body;
+    const { message, topic = "General", difficulty = "beginner" } = req.body;
 
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
-    }
+    const systemPrompt = `You are Lingoo, a friendly language tutor. 
+Topic: ${topic}
+Difficulty: ${difficulty}
+Provide concise, encouraging responses.`;
 
-    // Create system prompt based on topic and difficulty
-    const systemPrompt = `You are Lingoo AI, a friendly language tutor.
-Topic: ${topic || 'General'}
-Difficulty Level: ${difficulty || 'beginner'}
-Type: ${type || 'tutor'}
-
-Guidelines:
-- For beginner: Use simple words and short sentences. Include English translations.
-- For intermediate: Mix native language with English explanations.
-- For advanced: Respond mostly in the target language.
-- Keep responses concise (2-4 sentences).
-- Include pronunciation tips when helpful.
-- Be encouraging and supportive.`;
-
-    const response = await client.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: message },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
       ],
       max_tokens: 150,
-      temperature: 0.7,
     });
 
-    const reply = response.choices[0].message.content;
-
     res.json({
-      reply,
+      reply: response.choices[0].message.content,
       topic,
       difficulty,
       tokens_used: response.usage.total_tokens,
     });
   } catch (error) {
-    console.error('AI Error:', error);
-    const errMsg = error?.message || 'Unknown error from AI service';
-    // include any response details if present (helpful for remote debugging)
-    if (error?.response) {
-      console.error('AI response error details:', error.response);
-    }
-    res.status(500).json({
-      error: 'Failed to get AI response',
-      message: errMsg,
-    });
+    console.error("OpenAI API Error:", error.message);
+    res.status(500).json({ error: "Failed to get AI response" });
   }
-});
-
-module.exports = router;
+};
