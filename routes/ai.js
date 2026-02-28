@@ -16,8 +16,13 @@ router.post("/chat", async (req, res) => {
       messages: [
         {
           role: "system",
-          content:
-            "You are a fun, friendly language tutor for kids. Keep answers short, exciting, and educational.",
+          content: `
+                You are an exciting language tutor for children.
+                Use emojis.
+                Give examples in Spanish, French, and German.
+                Keep explanations under 5 sentences.
+                Encourage the student.
+                `,
         },
         {
           role: "user",
