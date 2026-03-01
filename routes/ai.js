@@ -1,46 +1,40 @@
 const express = require("express");
 const router = express.Router();
-const OpenAI = require("openai");
+const Groq = require("groq-sdk");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 router.post("/chat", async (req, res) => {
   try {
-    const message = req.body?.message;
-    const topic = req.body?.topic || "General";
-    const difficulty = req.body?.difficulty || "beginner";
+    const { message, topic = "General", difficulty = "beginner" } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    const systemPrompt = `You are Lingoo, a friendly language tutor.
+    const systemPrompt = `
+You are Lingoo, a friendly language tutor.
 Topic: ${topic}
 Difficulty: ${difficulty}
-Give short, clear, encouraging answers.`;
+Respond simply and clearly.
+`;
 
-    // ✅ NEW OpenAI API (CORRECT)
-    const completion = await openai.responses.create({
-      model: "gpt-4.1-mini",
-      input: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
-        {
-          role: "user",
-          content: message,
-        },
+    const completion = await groq.chat.completions.create({
+      model: "llama3-8b-8192",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
       ],
+      max_tokens: 150,
     });
 
     res.json({
-      reply: completion.output_text,
+      reply: completion.choices[0].message.content,
     });
   } catch (err) {
-    console.error("AI ERROR:", err);
+    console.error("Groq AI error:", err);
     res.status(500).json({
       error: "AI service failed",
       details: err.message,
