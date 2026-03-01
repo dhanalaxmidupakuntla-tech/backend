@@ -104,26 +104,30 @@ exports.getMe = async (req, res) => {
 
 exports.updateXp = async (req, res) => {
   try {
+    console.log("User:", req.user);
+    console.log("Body:", req.body);
+
     const { xp } = req.body;
 
-    // Get current XP
-    const { data } = await supabase
-      .from("profiles")
-      .select("xp")
+    if (!req.user?.id) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    const { data, error } = await supabase
+      .from("users")
+      .update({ xp })
       .eq("id", req.user.id)
+      .select()
       .single();
 
-    const newXp = (data?.xp || 0) + xp;
+    if (error) {
+      console.log("Supabase error:", error);
+      return res.status(400).json(error);
+    }
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({ xp: newXp })
-      .eq("id", req.user.id);
-
-    if (error) return res.status(400).json(error);
-
-    res.json({ xp: newXp });
+    res.json({ message: "XP updated", data });
   } catch (err) {
+    console.log("Server crash:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
