@@ -16,6 +16,13 @@ exports.register = async (req, res) => {
 
     if (error) return res.status(400).json({ error });
 
+    // 🔥 Create profile
+    await supabase.from("profiles").insert({
+      id: data.id,
+      xp: 0,
+      achievements: []
+    });
+
     res.json({ message: "User Registered Successfully" });
   } catch (err) {
     res.status(500).json({ message: "Server Error" });
