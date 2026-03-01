@@ -29,6 +29,18 @@ exports.register = async (req, res) => {
   }
 };
 
+exports.getProfile = async (req, res) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", req.user.id)
+    .single();
+
+  if (error) return res.status(400).json(error);
+
+  res.json(data);
+};
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;

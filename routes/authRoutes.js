@@ -9,6 +9,8 @@ router.post("/register", authController.register);
 // login
 router.post("/login", authController.login);
 
+router.get("/profile", authController.getProfile)
+
 // 👇 THIS WAS MISSING OR WRONG
 router.get("/me", auth, authController.getMe);
 
