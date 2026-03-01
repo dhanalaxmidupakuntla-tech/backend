@@ -67,7 +67,9 @@ exports.completeLesson = async (req, res) => {
       newLevel += 1;
       newXP -= 100;
     }
-    
+
+    const xpToLevel = 100 + (newLevel * 10);
+
     const { error: updateError } = await supabase
       .from("users")
       .update({
