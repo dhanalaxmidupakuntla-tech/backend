@@ -24,7 +24,13 @@ app.use(limiter);
 
 /* ================= CORS ================= */
 
-app.use(cors());
+
+app.use(cors({
+  origin: "https://13d6a0c6.frontend-ce3.pages.dev",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 
 /* ================= MIDDLEWARE ================= */
 app.use(express.json());
