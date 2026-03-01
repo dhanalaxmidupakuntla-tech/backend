@@ -14,6 +14,6 @@ router.get("/profile", auth, authController.getProfile)
 // 👇 THIS WAS MISSING OR WRONG
 router.get("/me", auth, authController.getMe);
 
-router.put("/profile/xp", authController.updateXp)
+router.put("/profile/xp",auth, authController.updateXp)
 
 module.exports = router;
