@@ -23,17 +23,16 @@ const limiter = rateLimit({
 app.use(limiter);
 
 /* ================= CORS ================= */
-const frontendUrls = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(",")
-  : ["http://localhost:5173", "http://localhost:5174"];
 
 app.use(
   cors({
-    origin: frontendUrls,
+    origin: [
+      "http://localhost:5173", // local dev
+      "https://your-frontend-domain.vercel.app" // production frontend
+    ],
     credentials: true,
   })
 );
-
 /* ================= MIDDLEWARE ================= */
 app.use(express.json());
 app.use(helmet());
