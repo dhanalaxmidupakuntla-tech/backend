@@ -1,39 +1,35 @@
 // routes/ai.js
 const express = require("express");
 const router = express.Router();
-const OpenAI = require("openai");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Import centralized AI service
+const { getAIResponse } = require("../lib/aiService");
 
-// POST /api/ai/chat
+/**
+ * POST /api/ai/chat
+ * Body: { message: string, topic?: string, difficulty?: string }
+ * Returns: { reply: string, topic: string, difficulty: string }
+ */
 router.post("/chat", async (req, res) => {
   try {
     const { message, topic = "General", difficulty = "beginner" } = req.body;
 
-    const systemPrompt = `You are Lingoo, a friendly language tutor. 
-Topic: ${topic}
-Difficulty: ${difficulty}
-Provide concise, encouraging responses.`;
+    if (!message || message.trim() === "") {
+      return res.status(400).json({ error: "Message cannot be empty" });
+    }
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: message },
-      ],
-      max_tokens: 150,
-    });
+    // Call AI service
+    const reply = await getAIResponse(message, { topic, difficulty });
 
     res.json({
-      reply: response.choices[0].message.content,
+      reply,
       topic,
       difficulty,
       tokens_used: response.usage.total_tokens,
     });
+    
   } catch (error) {
-    console.error("OpenAI API Error:", error.message);
+    console.error("AI Service Error:", error);
     res.status(500).json({ error: "Failed to get AI response" });
   }
 });
