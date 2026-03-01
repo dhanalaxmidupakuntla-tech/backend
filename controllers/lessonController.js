@@ -1,24 +1,28 @@
 const supabase = require("../config/supabaseClient");
 
 exports.getLessons = async (req, res) => {
-  const userId = req.user.id;
+  try {
+    const userId = req.user.id;
 
-  const { data: user, error: userError } = await supabase
-    .from("users")
-    .select("level")
-    .eq("id", userId)
-    .single();
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("level")
+      .eq("id", userId)
+      .single();
 
-  if (userError) return res.status(400).json(userError);
+    if (userError) return res.status(400).json(userError);
 
-  const { data: lessons, error: lessonError } = await supabase
-    .from("lessons")
-    .select("*")
-    .lte("level", user.level);
+    const { data: lessons, error: lessonError } = await supabase
+      .from("lessons")
+      .select("*")
+      .lte("level", user.level);
 
-  if (lessonError) return res.status(400).json(lessonError);
+    if (lessonError) return res.status(400).json(lessonError);
 
-  res.json(lessons);
+    res.json(lessons);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 exports.completeLesson = async (req, res) => {
@@ -30,6 +34,10 @@ exports.completeLesson = async (req, res) => {
       return res.status(400).json({ message: "lessonId is required" });
     }
 
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const { data: lesson, error: lessonError } = await supabase
       .from("lessons")
       .select("*")
@@ -37,7 +45,7 @@ exports.completeLesson = async (req, res) => {
       .single();
 
     if (lessonError || !lesson) {
-      return res.status(404).json({ message: "Lesson not found", receivedLessonId: lessonId });
+      return res.status(404).json({ message: "Lesson not found" });
     }
 
     const { data: user, error: userError } = await supabase
@@ -60,7 +68,7 @@ exports.completeLesson = async (req, res) => {
       newXP -= 100;
     }
 
-    await supabase
+    const { error: updateError } = await supabase
       .from("users")
       .update({
         xp: newXP,
@@ -68,6 +76,10 @@ exports.completeLesson = async (req, res) => {
         level: newLevel
       })
       .eq("id", userId);
+
+    if (updateError) {
+      return res.status(400).json(updateError);
+    }
 
     res.json({
       message: "Lesson Completed 🎉",
@@ -79,23 +91,25 @@ exports.completeLesson = async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
-  console.log("lessonId:", lessonId);
-  console.log("lesson:", lesson);
 };
 
 exports.getRecommendedLessons = async (req, res) => {
-  const userId = req.user.id;
+  try {
+    const userId = req.user.id;
 
-  const { data: user } = await supabase
-    .from("users")
-    .select("level")
-    .eq("id", userId)
-    .single();
+    const { data: user } = await supabase
+      .from("users")
+      .select("level")
+      .eq("id", userId)
+      .single();
 
-  const { data: lessons } = await supabase
-    .from("lessons")
-    .select("*")
-    .lte("level", user.level);
+    const { data: lessons } = await supabase
+      .from("lessons")
+      .select("*")
+      .lte("level", user.level);
 
-  res.json(lessons);
+    res.json(lessons);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
