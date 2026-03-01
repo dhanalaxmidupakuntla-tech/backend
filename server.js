@@ -24,14 +24,11 @@ app.use(limiter);
 
 /* ================= CORS ================= */
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173", // local dev
-    ],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
+
 /* ================= MIDDLEWARE ================= */
 app.use(express.json());
 app.use(helmet());
