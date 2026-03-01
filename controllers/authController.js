@@ -101,3 +101,20 @@ exports.getMe = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+exports.updateXp = async (req, res) => {
+  try {
+    const { xp } = req.body;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ xp })
+      .eq("id", req.user.id);
+
+    if (error) return res.status(400).json(error);
+
+    res.json({ message: "XP updated" });
+  } catch (err) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
