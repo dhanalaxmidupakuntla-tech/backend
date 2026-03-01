@@ -8,7 +8,6 @@ const openai = new OpenAI({
 
 router.post("/chat", async (req, res) => {
   try {
-    // ✅ Safe destructuring
     const message = req.body?.message;
     const topic = req.body?.topic || "General";
     const difficulty = req.body?.difficulty || "beginner";
@@ -19,22 +18,29 @@ router.post("/chat", async (req, res) => {
 
     const systemPrompt = `You are Lingoo, a friendly language tutor.
 Topic: ${topic}
-Difficulty: ${difficulty}`;
+Difficulty: ${difficulty}
+Give short, clear, encouraging answers.`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: message },
+    // ✅ NEW OpenAI API (CORRECT)
+    const completion = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: message,
+        },
       ],
-      max_tokens: 150,
     });
 
     res.json({
-      reply: response.choices[0].message.content,
+      reply: completion.output_text,
     });
   } catch (err) {
-    console.error("AI error:", err);
+    console.error("AI ERROR:", err);
     res.status(500).json({
       error: "AI service failed",
       details: err.message,
