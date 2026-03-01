@@ -8,20 +8,20 @@ const openai = new OpenAI({
 
 router.post("/chat", async (req, res) => {
   try {
-    const { message, topic = "General", difficulty = "beginner" } = req.body;
+    // ✅ Safe destructuring
+    const message = req.body?.message;
+    const topic = req.body?.topic || "General";
+    const difficulty = req.body?.difficulty || "beginner";
 
     if (!message) {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    const systemPrompt = `
-You are Lingoo AI, a friendly language tutor.
+    const systemPrompt = `You are Lingoo, a friendly language tutor.
 Topic: ${topic}
-Difficulty: ${difficulty}
-Be concise, encouraging, and simple.
-`;
+Difficulty: ${difficulty}`;
 
-    const completion = await openai.chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: systemPrompt },
@@ -31,13 +31,13 @@ Be concise, encouraging, and simple.
     });
 
     res.json({
-      reply: completion.choices[0].message.content,
+      reply: response.choices[0].message.content,
     });
-  } catch (error) {
-    console.error("AI ROUTE ERROR:", error);
+  } catch (err) {
+    console.error("AI error:", err);
     res.status(500).json({
       error: "AI service failed",
-      details: error.message,
+      details: err.message,
     });
   }
 });
