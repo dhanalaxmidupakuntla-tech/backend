@@ -23,7 +23,6 @@ const limiter = rateLimit({
 app.use(limiter);
 
 /* ================= CORS ================= */
-const cors = require("cors");
 
 const allowedOrigins = [
   "http://localhost:5173",
