@@ -24,27 +24,15 @@ app.use(limiter);
 
 /* ================= CORS ================= */
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://language-learning-cf0.pages.dev",
-];
+const cors = require("cors");
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow non-browser requests
-
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods : ["GET", "POST", "PUT", "DELETE"],
+    origin: "https://language-learning-cf0.pages.dev",
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
-
 
 /* ================= MIDDLEWARE ================= */
 app.use(express.json());
