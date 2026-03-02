@@ -24,8 +24,6 @@ app.use(limiter);
 
 /* ================= CORS ================= */
 
-const cors = require("cors");
-
 app.use(
   cors({
     origin: "https://language-learning-cf0.pages.dev",
