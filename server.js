@@ -23,13 +23,28 @@ const limiter = rateLimit({
 app.use(limiter);
 
 /* ================= CORS ================= */
+const cors = require("cors");
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://13d6a0c6.frontend-ce3.pages.dev",
+];
 
-app.use(cors({
-  origin: "https://13d6a0c6.frontend-ce3.pages.dev",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow non-browser requests
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods : ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 
 /* ================= MIDDLEWARE ================= */
