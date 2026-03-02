@@ -26,7 +26,7 @@ app.use(limiter);
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://13d6a0c6.frontend-ce3.pages.dev",
+  "https://language-learning-cf0.pages.dev",
 ];
 
 app.use(
